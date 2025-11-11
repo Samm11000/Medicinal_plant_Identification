@@ -94,13 +94,6 @@ col_upload, col_clear = st.columns([3, 1])
 with col_upload:
     uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
 
-with col_clear:
-    if st.button("🧹 Clear / Try Another"):
-        st.session_state.image_rgb = None
-        st.session_state.predicted_label = None
-        st.session_state.confidence = None
-        st.experimental_rerun()
-
 # -------------------------------------------------
 # 🧩 Prediction Function
 # -------------------------------------------------

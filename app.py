@@ -6,7 +6,7 @@ from tensorflow.keras.models import load_model
 from PIL import Image
 
 # -------------------------------------------------
-# ✅ Streamlit Page Config (must be first)
+# ✅ Streamlit Page Config
 # -------------------------------------------------
 st.set_page_config(
     page_title="Medicinal Plant Identifier 🌿",
@@ -19,16 +19,17 @@ st.set_page_config(
 # -------------------------------------------------
 MODEL_PATH = "./Models/medicinal_plant_model.keras"
 DATA_DIR = "./Database/data"
+SAMPLE_DIR = "./Sample_Test"  # Folder for sample images
 
 @st.cache_resource
 def load_trained_model():
+    """Load the trained model safely with caching."""
     if not os.path.exists(MODEL_PATH):
         st.error(f"❌ Model file not found at: {MODEL_PATH}")
         st.stop()
     model = load_model(MODEL_PATH)
     return model
 
-# Try loading model
 try:
     model = load_trained_model()
 except Exception as e:
@@ -50,42 +51,102 @@ inv_class_indices = {i: name for i, name in enumerate(class_names)}
 # -------------------------------------------------
 st.title("🌱 Medicinal Plant Identification By Shasha Vali")
 st.markdown(
-    "Upload a **leaf image** of an Indian medicinal plant to identify it using a trained deep learning model."
+    "Upload a **leaf image** or choose a **sample image** below to identify the medicinal plant using a trained deep learning model."
 )
 
-uploaded_file = st.file_uploader("📤 Upload an Image", type=["jpg", "jpeg", "png"])
+# -------------------------------------------------
+# 🧪 Sample Image Section
+# -------------------------------------------------
+SAMPLES = {
+    "Mint": "./Sample_Test/mint1.jpeg",
+    "Rasna": "./Sample_Test/rasna1.png",
+    "Jamun": "./Sample_Test/jamun1.png",
+    "Tulsi": "./Sample_Test/betel.png"
+}
 
-if uploaded_file is not None:
-    try:
-        # Read image file
-        file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-        image = cv2.imdecode(file_bytes, 1)
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        img_resized = cv2.resize(image_rgb, (224, 224))
-        img_norm = img_resized.astype("float32") / 255.0
-        img_expanded = np.expand_dims(img_norm, axis=0)
+st.subheader("🌿 Try with Sample Images")
 
-        # Run model prediction with spinner
-        with st.spinner("🔍 Identifying plant... please wait..."):
-            preds = model.predict(img_expanded)
-            pred_idx = np.argmax(preds, axis=1)[0]
-            confidence = np.max(preds)
-            predicted_label = inv_class_indices[pred_idx]
+cols = st.columns(4)
+selected_sample = None
 
-        # Display uploaded image
-        st.image(image_rgb, caption="📷 Uploaded Leaf", use_column_width=True)
+for i, (name, path) in enumerate(SAMPLES.items()):
+    if os.path.exists(path):
+        with cols[i]:
+            st.image(path, caption=name, use_container_width=True)
+            if st.button(f"Use {name}", key=name):
+                selected_sample = path
+    else:
+        with cols[i]:
+            st.warning(f"⚠️ {name} image not found")
 
-        # 🔸 Confidence Threshold Check (Below 60% = Not Defined)
-        if confidence * 100 < 60:
-            st.warning("⚠️ **Prediction Confidence is below 60%.**")
-            st.error("🌿 **Predicted Plant:** Not Defined")
-            st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
-        else:
-            st.success(f"🌿 **Predicted Plant:** {predicted_label}")
-            st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
+# -------------------------------------------------
+# 📤 Manual Upload Section
+# -------------------------------------------------
+st.markdown("---")
+st.markdown("### 📤 Or upload your own leaf image")
+uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
 
-    except Exception as e:
-        st.error(f"⚠️ Error processing image: {e}")
+# -------------------------------------------------
+# 🧩 Prediction Function
+# -------------------------------------------------
+def predict_image(image_rgb):
+    """Run model prediction on an input image."""
+    img_resized = cv2.resize(image_rgb, (224, 224))
+    img_norm = img_resized.astype("float32") / 255.0
+    img_expanded = np.expand_dims(img_norm, axis=0)
 
+    with st.spinner("🔍 Identifying plant... please wait..."):
+        preds = model.predict(img_expanded)
+        pred_idx = np.argmax(preds, axis=1)[0]
+        confidence = np.max(preds)
+        predicted_label = inv_class_indices[pred_idx]
+    return predicted_label, confidence
+
+# -------------------------------------------------
+# 🚀 Run Prediction
+# -------------------------------------------------
+image_rgb = None
+
+if selected_sample:
+    image = cv2.imread(selected_sample)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+elif uploaded_file is not None:
+    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+if image_rgb is not None:
+    predicted_label, confidence = predict_image(image_rgb)
+
+    # 🖼️ Display smaller & centered image
+    st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
+    st.image(image_rgb, caption="📷 Input Leaf", width=300)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # 🌿 Display prediction result
+    if confidence * 100 < 60:
+        st.warning("⚠️ **Prediction Confidence is below 60%.**")
+        st.error("🌿 **Predicted Plant:** Not Defined")
+        st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
+    else:
+        st.success(f"🌿 **Predicted Plant:** {predicted_label}")
+        st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
 else:
-    st.warning("📥 Please upload a leaf image to identify the plant.")
+    st.info("📸 Select a sample image or upload your own to begin.")
+
+# -------------------------------------------------
+# 🌐 Footer with GitHub & LinkedIn
+# -------------------------------------------------
+st.markdown("---")
+st.markdown(
+    """
+    <div style='text-align: center; font-size: 16px;'>
+        👨‍💻 Developed by <b>Shaik Shasha Vali</b><br><br>
+        <a href="https://www.linkedin.com/in/shasha-vali-ab539428a/" target="_blank">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" width="28px"/>
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)

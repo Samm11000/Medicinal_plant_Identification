@@ -61,7 +61,7 @@ SAMPLES = {
     "Mint": "./Sample_Test/mint1.jpeg",
     "Rasna": "./Sample_Test/rasna1.png",
     "Jamun": "./Sample_Test/jamun1.png",
-    "Tulsi": "./Sample_Test/betel.png"
+    "Tulsi": "./Sample_Test/tulsi.png"
 }
 
 st.subheader("🌿 Try with Sample Images")
@@ -72,7 +72,11 @@ selected_sample = None
 for i, (name, path) in enumerate(SAMPLES.items()):
     if os.path.exists(path):
         with cols[i]:
-            st.image(path, caption=name, use_container_width=True)
+            # ✅ Compatibility-safe image display
+            try:
+                st.image(path, caption=name, use_container_width=True)
+            except TypeError:
+                st.image(path, caption=name, use_column_width=True)
             if st.button(f"Use {name}", key=name):
                 selected_sample = path
     else:
@@ -110,7 +114,6 @@ image_rgb = None
 if selected_sample:
     image = cv2.imread(selected_sample)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
 elif uploaded_file is not None:
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
@@ -136,7 +139,7 @@ else:
     st.info("📸 Select a sample image or upload your own to begin.")
 
 # -------------------------------------------------
-# 🌐 Footer with GitHub & LinkedIn
+# 🌐 Footer with LinkedIn
 # -------------------------------------------------
 st.markdown("---")
 st.markdown(
@@ -144,7 +147,7 @@ st.markdown(
     <div style='text-align: center; font-size: 16px;'>
         👨‍💻 Developed by <b>Shaik Shasha Vali</b><br><br>
         <a href="https://www.linkedin.com/in/shasha-vali-ab539428a/" target="_blank">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" width="28px"/>
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" width="30px"/>
         </a>
     </div>
     """,

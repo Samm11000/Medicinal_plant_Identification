@@ -107,25 +107,36 @@ def predict_image(image_rgb):
     return predicted_label, confidence
 
 # -------------------------------------------------
-# 🚀 Run Prediction + Reset Option
+# 🧹 Session State Initialization
 # -------------------------------------------------
 if "image_rgb" not in st.session_state:
     st.session_state.image_rgb = None
     st.session_state.predicted_label = None
     st.session_state.confidence = None
 
-# If user selects a sample image
+# -------------------------------------------------
+# 🚀 Input Handling (Upload or Sample)
+# -------------------------------------------------
+# Handle sample image selection
 if selected_sample:
     image = cv2.imread(selected_sample)
     st.session_state.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-# If user uploads an image
+# Handle file upload
 elif uploaded_file is not None:
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     st.session_state.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-# Prediction Logic
+# ✅ Auto-clear output if image removed
+elif uploaded_file is None and not selected_sample:
+    st.session_state.image_rgb = None
+    st.session_state.predicted_label = None
+    st.session_state.confidence = None
+
+# -------------------------------------------------
+# 🔍 Prediction and Display
+# -------------------------------------------------
 if st.session_state.image_rgb is not None:
     predicted_label, confidence = predict_image(st.session_state.image_rgb)
     st.session_state.predicted_label = predicted_label
@@ -145,7 +156,7 @@ if st.session_state.image_rgb is not None:
         st.success(f"🌿 **Predicted Plant:** {predicted_label}")
         st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
 
-    # 🧹 Add Clear Button
+    # 🧹 Clear Button
     if st.button("🧹 Clear Image / Try Another"):
         st.session_state.image_rgb = None
         st.session_state.predicted_label = None

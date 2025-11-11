@@ -59,8 +59,8 @@ st.markdown(
 # -------------------------------------------------
 SAMPLES = {
     "Mint": "./Sample_Test/mint1.jpeg",
-    "Rasna": "./Sample_Test/rasna1.png",
-    "Jamun": "./Sample_Test/jamun1.png",
+    "Rasna": "./Sample_Test/Rasna1.png",
+    "Jamun": "./Sample_Test/Jamun1.png",
     "Tulsi": "./Sample_Test/tulsi.png"
 }
 

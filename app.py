@@ -55,6 +55,19 @@ st.markdown(
 )
 
 # -------------------------------------------------
+# 📤 Manual Upload Section + Clear Button
+# -------------------------------------------------
+st.markdown("---")
+st.markdown("### 📤 Upload Image ")
+
+col_upload, col_clear = st.columns([3, 1])
+
+with col_upload:
+    uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
+
+
+
+# -------------------------------------------------
 # 🧪 Sample Image Section
 # -------------------------------------------------
 SAMPLES = {
@@ -83,16 +96,6 @@ for i, (name, path) in enumerate(SAMPLES.items()):
         with cols[i]:
             st.warning(f"⚠️ {name} image not found")
 
-# -------------------------------------------------
-# 📤 Manual Upload Section + Clear Button
-# -------------------------------------------------
-st.markdown("---")
-st.markdown("### 📤 Upload Image ")
-
-col_upload, col_clear = st.columns([3, 1])
-
-with col_upload:
-    uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
 
 # -------------------------------------------------
 # 🧩 Prediction Function

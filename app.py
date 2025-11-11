@@ -49,7 +49,7 @@ inv_class_indices = {i: name for i, name in enumerate(class_names)}
 # -------------------------------------------------
 # 🖼️ Streamlit UI
 # -------------------------------------------------
-st.title("🌱 Medicinal Plant Identification By Shasha Vali")
+st.title("🌱 Medicinal Plant Identification")
 st.markdown(
     "Upload a **leaf image** or choose a **sample image** below to identify the medicinal plant using a trained deep learning model."
 )
@@ -84,11 +84,22 @@ for i, (name, path) in enumerate(SAMPLES.items()):
             st.warning(f"⚠️ {name} image not found")
 
 # -------------------------------------------------
-# 📤 Manual Upload Section
+# 📤 Manual Upload Section + Clear Button
 # -------------------------------------------------
 st.markdown("---")
-st.markdown("### 📤 Or upload your own leaf image")
-uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
+st.markdown("### 📤 Upload or Reset")
+
+col_upload, col_clear = st.columns([3, 1])
+
+with col_upload:
+    uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
+
+with col_clear:
+    if st.button("🧹 Clear / Try Another"):
+        st.session_state.image_rgb = None
+        st.session_state.predicted_label = None
+        st.session_state.confidence = None
+        st.experimental_rerun()
 
 # -------------------------------------------------
 # 🧩 Prediction Function
@@ -155,13 +166,6 @@ if st.session_state.image_rgb is not None:
     else:
         st.success(f"🌿 **Predicted Plant:** {predicted_label}")
         st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
-
-    # 🧹 Clear Button
-    if st.button("🧹 Clear Image / Try Another"):
-        st.session_state.image_rgb = None
-        st.session_state.predicted_label = None
-        st.session_state.confidence = None
-        st.experimental_rerun()
 
 else:
     st.info("📸 Select a sample image or upload your own to begin.")

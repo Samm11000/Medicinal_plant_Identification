@@ -59,8 +59,8 @@ st.markdown(
 # -------------------------------------------------
 SAMPLES = {
     "Mint": "./Sample_Test/mint1.jpeg",
-    "Rasna": "./Sample_Test/Rasna1.png",
-    "Jamun": "./Sample_Test/Jamun1.png",
+    "Rasna": "./Sample_Test/rasna1.png",
+    "Jamun": "./Sample_Test/jamun1.png",
     "Tulsi": "./Sample_Test/tulsi.png"
 }
 
@@ -107,24 +107,33 @@ def predict_image(image_rgb):
     return predicted_label, confidence
 
 # -------------------------------------------------
-# 🚀 Run Prediction
+# 🚀 Run Prediction + Reset Option
 # -------------------------------------------------
-image_rgb = None
+if "image_rgb" not in st.session_state:
+    st.session_state.image_rgb = None
+    st.session_state.predicted_label = None
+    st.session_state.confidence = None
 
+# If user selects a sample image
 if selected_sample:
     image = cv2.imread(selected_sample)
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    st.session_state.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+# If user uploads an image
 elif uploaded_file is not None:
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    st.session_state.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-if image_rgb is not None:
-    predicted_label, confidence = predict_image(image_rgb)
+# Prediction Logic
+if st.session_state.image_rgb is not None:
+    predicted_label, confidence = predict_image(st.session_state.image_rgb)
+    st.session_state.predicted_label = predicted_label
+    st.session_state.confidence = confidence
 
     # 🖼️ Display smaller & centered image
     st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
-    st.image(image_rgb, caption="📷 Input Leaf", width=300)
+    st.image(st.session_state.image_rgb, caption="📷 Input Leaf", width=300)
     st.markdown("</div>", unsafe_allow_html=True)
 
     # 🌿 Display prediction result
@@ -135,6 +144,14 @@ if image_rgb is not None:
     else:
         st.success(f"🌿 **Predicted Plant:** {predicted_label}")
         st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
+
+    # 🧹 Add Clear Button
+    if st.button("🧹 Clear Image / Try Another"):
+        st.session_state.image_rgb = None
+        st.session_state.predicted_label = None
+        st.session_state.confidence = None
+        st.experimental_rerun()
+
 else:
     st.info("📸 Select a sample image or upload your own to begin.")
 

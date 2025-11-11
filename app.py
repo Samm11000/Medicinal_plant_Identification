@@ -48,7 +48,7 @@ inv_class_indices = {i: name for i, name in enumerate(class_names)}
 # -------------------------------------------------
 # 🖼️ Streamlit UI
 # -------------------------------------------------
-st.title("🌱 Medicinal Plant Identification using MobileNet")
+st.title("🌱 Medicinal Plant Identification By Shasha Vali")
 st.markdown(
     "Upload a **leaf image** of an Indian medicinal plant to identify it using a trained deep learning model."
 )
@@ -72,10 +72,17 @@ if uploaded_file is not None:
             confidence = np.max(preds)
             predicted_label = inv_class_indices[pred_idx]
 
-        # Display result
+        # Display uploaded image
         st.image(image_rgb, caption="📷 Uploaded Leaf", use_column_width=True)
-        st.success(f"🌿 **Predicted Plant:** {predicted_label}")
-        st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
+
+        # 🔸 Confidence Threshold Check (Below 60% = Not Defined)
+        if confidence * 100 < 60:
+            st.warning("⚠️ **Prediction Confidence is below 60%.**")
+            st.error("🌿 **Predicted Plant:** Not Defined")
+            st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
+        else:
+            st.success(f"🌿 **Predicted Plant:** {predicted_label}")
+            st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
 
     except Exception as e:
         st.error(f"⚠️ Error processing image: {e}")

@@ -70,6 +70,7 @@ with col_upload:
 # -------------------------------------------------
 # 🧪 Sample Image Section
 # -------------------------------------------------
+st.markdown("---")
 SAMPLES = {
     "Mint": "./Sample_Test/mint1.jpeg",
     "Rasna": "./Sample_Test/Rasna1.png",

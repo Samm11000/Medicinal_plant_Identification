@@ -87,7 +87,7 @@ for i, (name, path) in enumerate(SAMPLES.items()):
 # 📤 Manual Upload Section + Clear Button
 # -------------------------------------------------
 st.markdown("---")
-st.markdown("### 📤 Upload or Reset")
+st.markdown("### 📤 Upload ")
 
 col_upload, col_clear = st.columns([3, 1])
 

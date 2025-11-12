@@ -4,14 +4,14 @@ This project is a Streamlit web application that identifies medicinal plants fro
 
 🚀 **Key Features**
 
-*   **Image Upload:** Allows users to upload leaf images directly through the web interface. 📤
-*   **Sample Image Selection:** Offers a selection of pre-loaded sample images for testing the application. 🖼️
-*   **Pre-trained Keras Model:** Uses a pre-trained Keras model (`medicinal_plant_model.keras`) for accurate plant identification. 🧠
-*   **Real-time Prediction:** Provides prediction results with confidence scores in real-time. ⏱️
-*   **User-Friendly Interface:** Built with Streamlit for an intuitive and easy-to-use experience. 💻
-*   **Error Handling:** Gracefully handles errors such as missing model files or data directories. ⚠️
-*   **Session State Management:** Uses Streamlit's session state to persist variables across re-runs. 🔄
-*   **Class Label Mapping:** Dynamically loads class labels from the data directory to interpret model predictions. 🏷️
+*   **Image Upload:** Allows users to upload leaf images directly through the web interface. 
+*   **Sample Image Selection:** Offers a selection of pre-loaded sample images for testing the application. 
+*   **Pre-trained Keras Model:** Uses a pre-trained Keras model (`medicinal_plant_model.keras`) for accurate plant identification. 
+*   **Real-time Prediction:** Provides prediction results with confidence scores in real-time. 
+*   **User-Friendly Interface:** Built with Streamlit for an intuitive and easy-to-use experience. 
+*   **Error Handling:** Gracefully handles errors such as missing model files or data directories. 
+*   **Session State Management:** Uses Streamlit's session state to persist variables across re-runs. 
+*   **Class Label Mapping:** Dynamically loads class labels from the data directory to interpret model predictions. 
 
 🛠️ **Tech Stack**
 

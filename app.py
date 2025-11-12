@@ -19,16 +19,14 @@ st.set_page_config(
 # -------------------------------------------------
 MODEL_PATH = "./Models/medicinal_plant_model.keras"
 DATA_DIR = "./Database/data"
-SAMPLE_DIR = "./Sample_Test"  # Folder for sample images
+SAMPLE_DIR = "./Sample_Test"
 
 @st.cache_resource
 def load_trained_model():
-    """Load the trained model safely with caching."""
     if not os.path.exists(MODEL_PATH):
         st.error(f"❌ Model file not found at: {MODEL_PATH}")
         st.stop()
-    model = load_model(MODEL_PATH)
-    return model
+    return load_model(MODEL_PATH)
 
 try:
     model = load_trained_model()
@@ -47,61 +45,9 @@ class_names = sorted(os.listdir(DATA_DIR))
 inv_class_indices = {i: name for i, name in enumerate(class_names)}
 
 # -------------------------------------------------
-# 🖼️ Streamlit UI
-# -------------------------------------------------
-st.title("🌱 Medicinal Plant Identification")
-st.markdown(
-    "Upload a **leaf image** or choose a **sample image** below to identify the medicinal plant using a trained deep learning model."
-)
-
-# -------------------------------------------------
-# 🧪 Sample Image Section
-# -------------------------------------------------
-SAMPLES = {
-    "Mint": "./Sample_Test/mint1.jpeg",
-    "Rasna": "./Sample_Test/Rasna1.png",
-    "Jamun": "./Sample_Test/Jamun1.png",
-    "Tulsi": "./Sample_Test/tulsi.png"
-}
-
-st.subheader("🌿 Try with Sample Images")
-
-cols = st.columns(4)
-selected_sample = None
-
-for i, (name, path) in enumerate(SAMPLES.items()):
-    if os.path.exists(path):
-        with cols[i]:
-            # ✅ Compatibility-safe image display
-            try:
-                st.image(path, caption=name, use_container_width=True)
-            except TypeError:
-                st.image(path, caption=name, use_column_width=True)
-            if st.button(f"Use {name}", key=name):
-                selected_sample = path
-    else:
-        with cols[i]:
-            st.warning(f"⚠️ {name} image not found")
-
-# -------------------------------------------------
-# 📤 Manual Upload Section + Clear Button
-# -------------------------------------------------
-st.markdown("---")
-st.markdown("### 📤 Upload Image ")
-
-col_upload, col_clear = st.columns([3, 1])
-
-with col_upload:
-    uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
-
-
-
-
-# -------------------------------------------------
 # 🧩 Prediction Function
 # -------------------------------------------------
 def predict_image(image_rgb):
-    """Run model prediction on an input image."""
     img_resized = cv2.resize(image_rgb, (224, 224))
     img_norm = img_resized.astype("float32") / 255.0
     img_expanded = np.expand_dims(img_norm, axis=0)
@@ -114,47 +60,61 @@ def predict_image(image_rgb):
     return predicted_label, confidence
 
 # -------------------------------------------------
-# 🧹 Session State Initialization
+# 🧹 Session State
 # -------------------------------------------------
 if "image_rgb" not in st.session_state:
     st.session_state.image_rgb = None
     st.session_state.predicted_label = None
     st.session_state.confidence = None
+if "sample_selected" not in st.session_state:
+    st.session_state.sample_selected = False
 
 # -------------------------------------------------
-# 🚀 Input Handling (Upload or Sample)
+# 🖼️ UI Layout
 # -------------------------------------------------
-# Handle sample image selection
-if selected_sample:
-    image = cv2.imread(selected_sample)
-    st.session_state.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+st.title("🌱 Medicinal Plant Identification")
+st.markdown(
+    "Upload a **leaf image** below or click **'See Sample Images'** to test with preloaded samples."
+)
 
-# Handle file upload
-elif uploaded_file is not None:
+# -------------------------------------------------
+# 📤 Upload Section (Now First)
+# -------------------------------------------------
+st.markdown("### 📤 Upload Your Image")
+
+col_upload, col_clear = st.columns([3, 1])
+with col_upload:
+    uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png", "webp"])
+
+
+# -------------------------------------------------
+# 🚀 Handle Upload or Clear
+# -------------------------------------------------
+if uploaded_file is not None:
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     st.session_state.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-# ✅ Auto-clear output if image removed
-elif uploaded_file is None and not selected_sample:
+    st.session_state.sample_selected = False
+elif uploaded_file is None and not st.session_state.sample_selected:
+    # Only clear if no upload AND no sample selected
     st.session_state.image_rgb = None
     st.session_state.predicted_label = None
     st.session_state.confidence = None
 
 # -------------------------------------------------
-# 🔍 Prediction and Display
+# 🔍 Prediction & Display
 # -------------------------------------------------
 if st.session_state.image_rgb is not None:
     predicted_label, confidence = predict_image(st.session_state.image_rgb)
     st.session_state.predicted_label = predicted_label
     st.session_state.confidence = confidence
 
-    # 🖼️ Display smaller & centered image
+    # Centered image display
     st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
     st.image(st.session_state.image_rgb, caption="📷 Input Leaf", width=300)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # 🌿 Display prediction result
+    # Prediction output
     if confidence * 100 < 60:
         st.warning("⚠️ **Prediction Confidence is below 60%.**")
         st.error("🌿 **Predicted Plant:** Not Defined")
@@ -162,12 +122,45 @@ if st.session_state.image_rgb is not None:
     else:
         st.success(f"🌿 **Predicted Plant:** {predicted_label}")
         st.info(f"✨ **Confidence:** {confidence*100:.2f}%")
-
 else:
-    st.info("📸 Select a sample image or upload your own to begin.")
+    st.info("📸 Upload or select a sample image to start.")
 
 # -------------------------------------------------
-# 🌐 Footer with LinkedIn
+# 🌿 Sample Images (Collapsible)
+# -------------------------------------------------
+st.markdown("---")
+st.subheader("🌿 Sample Images")
+
+SAMPLES = {
+    "Mint": "./Sample_Test/mint1.jpeg",
+    "Rasna": "./Sample_Test/Rasna1.png",
+    "Jamun": "./Sample_Test/Jamun1.png",
+    "Tulsi": "./Sample_Test/tulsi.png"
+}
+
+with st.expander("📁 See Sample Images"):
+    cols = st.columns(4)
+    for i, (name, path) in enumerate(SAMPLES.items()):
+        if os.path.exists(path):
+            with cols[i]:
+                try:
+                    st.image(path, caption=name, use_container_width=True)
+                except TypeError:
+                    st.image(path, caption=name, use_column_width=True)
+                if st.button(f"Use {name}", key=name):
+                    image = cv2.imread(path)
+                    st.session_state.image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                    st.session_state.sample_selected = True
+                    if hasattr(st, "rerun"):
+                        st.rerun()
+                    else:
+                        st.experimental_rerun()
+        else:
+            with cols[i]:
+                st.warning(f"⚠️ {name} image not found")
+
+# -------------------------------------------------
+# 🌐 Footer
 # -------------------------------------------------
 st.markdown("---")
 st.markdown(

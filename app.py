@@ -147,12 +147,6 @@ with st.expander("📁 See Sample Images"):
 st.markdown("---")
 st.markdown(
     """
-    <div style='text-align: center; font-size: 16px;'>
-        👨‍💻 Developed by <b>Shaik Shasha Vali</b><br><br>
-        <a href="https://www.linkedin.com/in/shasha-vali-ab539428a/" target="_blank">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" width="30px"/>
-        </a>
-    </div>
     """,
     unsafe_allow_html=True
 )
